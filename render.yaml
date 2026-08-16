@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: neet-roadmap
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt gunicorn
+    startCommand: gunicorn -w 2 -b 0.0.0.0:$PORT app:app
+    envVars:
+      - key: SECRET_KEY
+        value: neet-roadmap-2026-production-key
+      - key: DATABASE_URL
+        value: sqlite:///roadmap.db
+      - key: PYTHON_VERSION
+        value: 3.11.9

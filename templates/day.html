@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day {{ day_number }} - NEET Roadmap 2026-27</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1><span class="icon">🧬</span> NEET + BOARDS ROADMAP 2026-27</h1>
+            <nav class="nav-links">
+                <a href="{{ url_for('index') }}">Dashboard</a>
+                <a href="{{ url_for('calendar') }}">Calendar</a>
+                <a href="{{ url_for('progress') }}">Progress</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Day Banner -->
+        <div class="phase-banner">
+            <h2>{{ dow }} | Day {{ day_number }} of 120</h2>
+            <p><strong>📅 Date:</strong> {{ date_obj.strftime('%B %d, %Y') }} | <strong>🎯 Phase:</strong> {{ phase }}</p>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ completion }}%"></div>
+            </div>
+            <p style="margin-top: 0.5rem; color: #0f0c29; font-weight: 700;">
+                Completion: {{ completed }}/{{ total }} tasks ({{ completion }}%)
+            </p>
+        </div>
+
+        <!-- Day Tasks -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+            <h2 style="color:#00f2fe;">📝 Today's Detailed Tasks</h2>
+            <div style="display:flex; gap:1rem;">
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">← Back to Dashboard</a>
+                {% set prev_day = day_number - 1 %}
+                {% set next_day = day_number + 1 %}
+                <a href="{{ url_for('day_view', day_number=prev_day) }}" class="btn" style="{{ 'display:none' if day_number <= 1 else '' }}">← Prev Day</a>
+                <a href="{{ url_for('day_view', day_number=next_day) }}" class="btn" style="{{ 'display:none' if day_number >= 120 else '' }}">Next Day →</a>
+            </div>
+        </div>
+
+        <!-- Tasks organized by block -->
+        {% set blocks = tasks | groupby('block') %}
+        {% for block_name, block_tasks in blocks %}
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header">
+                <span class="subject-icon">{{ block_name }}</span>
+                <h3>Block {{ block_name }}</h3>
+                <span class="phase-badge">{{ block_tasks | selectattr('completed') | list | length }}/{{ block_tasks | length }} done</span>
+            </div>
+            <ul class="task-list">
+                {% for task in block_tasks %}
+                <li class="task-item {{ 'completed' if task.completed else '' }}">
+                    <div class="task-checkbox {{
+                        'subject-biology' if task.subject == 'biology' else
+                        'subject-chemistry' if task.subject == 'chemistry' else
+                        'subject-physics' if task.subject == 'physics' else
+                        'subject-english' if task.subject == 'english' else
+                        'subject-test'
+                    }}" onclick="toggleTask({{ task.id }})"></div>
+                    <span class="subject-badge {{
+                        'subject-biology' if task.subject == 'biology' else
+                        'subject-chemistry' if task.subject == 'chemistry' else
+                        'subject-physics' if task.subject == 'physics' else
+                        'subject-english' if task.subject == 'english' else
+                        'subject-test'
+                    }}">{{ task.subject | upper }}</span>
+                    <div class="task-title">{{ task.title }}</div>
+                    <div class="task-desc">{{ task.description }}</div>
+                    <div class="task-target"><strong>🎯 Target:</strong> {{ task.target }}</div>
+                    <div class="task-time">
+                        <strong>🕘 Time:</strong> {{ task.time_start }} - {{ task.time_end }}
+                        | <strong>📋 Block:</strong> {{ task.block }}
+                        {% if task.notes %}
+                        | <a href="#" onclick="openNotesModal({{ task.id }}); return false;"><i class="fas fa-edit"></i> Edit Notes</a>
+                        {% else %}
+                        | <a href="#" onclick="openNotesModal({{ task.id }}); return false;"><i class="fas fa-plus"></i> Add Notes</a>
+                        {% endif %}
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+
+        <!-- Day completion summary -->
+        <div class="card" style="text-align: center;">
+            <h3 style="color: #00f2fe; margin-bottom: 1rem;">Day Summary</h3>
+            <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;">
+                {% set bio_done = tasks | selectattr('subject', 'equalto', 'biology') | selectattr('completed') | list | length %}
+                {% set chem_done = tasks | selectattr('subject', 'equalto', 'chemistry') | selectattr('completed') | list | length %}
+                {% set phys_done = tasks | selectattr('subject', 'equalto', 'physics') | selectattr('completed') | list | length %}
+                {% set eng_done = tasks | selectattr('subject', 'equalto', 'english') | selectattr('completed') | list | length %}
+                
+                <div style="text-align: center;">
+                    <div style="font-size: 2rem;">🧬</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #4caf50;">{{ bio_done }}/{{ tasks | selectattr('subject', 'equalto', 'biology') | list | length }}</div>
+                    <div style="color: #a0a0a0;">Biology</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 2rem;">🧪</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #2196f3;">{{ chem_done }}/{{ tasks | selectattr('subject', 'equalto', 'chemistry') | list | length }}</div>
+                    <div style="color: #a0a0a0;">Chemistry</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 2rem;">⚡</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #9c27b0;">{{ phys_done }}/{{ tasks | selectattr('subject', 'equalto', 'physics') | list | length }}</div>
+                    <div style="color: #a0a0a0;">Physics</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 2rem;">📖</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #ff9800;">{{ eng_done }}/{{ tasks | selectattr('subject', 'equalto', 'english') | list | length }}</div>
+                    <div style="color: #a0a0a0;">English</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Modal -->
+    <div id="notesModal" class="modal">
+        <div class="modal-content">
+            <h3>Add Notes for this Task</h3>
+            <textarea id="noteText" placeholder="Enter your notes here..."></textarea>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveNote()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTaskId = null;
+
+        function toggleTask(taskId) {
+            fetch(`/toggle_ajax/${taskId}`)
+                .then(response => response.json())
+                .then(data => {
+                    location.reload();
+                });
+        }
+
+        function openNotesModal(taskId) {
+            currentTaskId = taskId;
+            document.getElementById('notesModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('notesModal').style.display = 'none';
+            currentTaskId = null;
+        }
+
+        function saveNote() {
+            const note = document.getElementById('noteText').value;
+            if (currentTaskId) {
+                fetch('/add_note', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: `task_id=${currentTaskId}&note=${encodeURIComponent(note)}`
+                }).then(() => {
+                    closeModal();
+                    location.reload();
+                });
+            }
+        }
+    </script>
+</body>
+</html>

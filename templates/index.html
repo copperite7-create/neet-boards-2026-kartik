@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEET Roadmap 2026-27 | Class 12 Biology + NEET Preparation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1><span class="icon">🧬</span> NEET + BOARDS ROADMAP 2026-27</h1>
+            <nav class="nav-links">
+                <a href="{{ url_for('index') }}" class="active">Dashboard</a>
+                <a href="{{ url_for('calendar') }}">Calendar</a>
+                <a href="{{ url_for('progress') }}">Progress</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Today's Date Banner -->
+        <div class="today-date">
+            <i class="fas fa-calendar-day"></i> {{ current_date.strftime('%A, %B %d, %Y') }}
+        </div>
+
+        <!-- Phase Banner -->
+        <div class="phase-banner">
+            <h2>{{ phase_label }}</h2>
+            <p>Day {{ current_day }} of 120 | Starting from <strong>August 17, 2026</strong></p>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ (current_day / 120 * 100) | round(1) }}%"></div>
+            </div>
+        </div>
+
+        <!-- Task Summary -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+            <h2 style="color:#00f2fe; font-size:1.5rem;">Today's Tasks ({{ completed_today }}/{{ total_today }} completed)</h2>
+            <a href="{{ url_for('day_view', day_number=current_day) }}" class="btn btn-primary">View Full Day</a>
+        </div>
+
+        <!-- Tasks by Subject -->
+        <div class="dashboard-grid">
+            <!-- Biology -->
+            {% set bio_tasks = tasks | selectattr('subject', 'equalto', 'biology') | list %}
+            {% if bio_tasks %}
+            <div class="card">
+                <div class="card-header">
+                    <span class="subject-icon">🧬</span>
+                    <h3>BIOLOGY</h3>
+                    <span class="phase-badge">{{ bio_tasks | selectattr('completed') | list | length }}/{{ bio_tasks | length }}</span>
+                </div>
+                <ul class="task-list">
+                    {% for task in bio_tasks %}
+                    <li class="task-item {{ 'completed' if task.completed else '' }}">
+                        <div class="task-checkbox" onclick="toggleTask({{ task.id }})"></div>
+                        <span class="subject-badge subject-biology">BIOLOGY</span>
+                        <div class="task-title">{{ task.title }}</div>
+                        {% if task.description %}
+                        <div class="task-desc">{{ task.description }}</div>
+                        {% endif %}
+                        {% if task.target %}
+                        <div class="task-target"><strong>🎯 Target:</strong> {{ task.target }}</div>
+                        {% endif %}
+                        <div class="task-time"><strong>🕘 Time:</strong> {{ task.time_start }} - {{ task.time_end }} | {{ task.block }}</div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- Chemistry -->
+            {% set chem_tasks = tasks | selectattr('subject', 'equalto', 'chemistry') | list %}
+            {% if chem_tasks %}
+            <div class="card">
+                <div class="card-header">
+                    <span class="subject-icon">🧪</span>
+                    <h3>CHEMISTRY</h3>
+                    <span class="phase-badge">{{ chem_tasks | selectattr('completed') | list | length }}/{{ chem_tasks | length }}</span>
+                </div>
+                <ul class="task-list">
+                    {% for task in chem_tasks %}
+                    <li class="task-item {{ 'completed' if task.completed else '' }}">
+                        <div class="task-checkbox" onclick="toggleTask({{ task.id }})"></div>
+                        <span class="subject-badge subject-chemistry">CHEMISTRY</span>
+                        <div class="task-title">{{ task.title }}</div>
+                        {% if task.description %}
+                        <div class="task-desc">{{ task.description }}</div>
+                        {% endif %}
+                        {% if task.target %}
+                        <div class="task-target"><strong>🎯 Target:</strong> {{ task.target }}</div>
+                        {% endif %}
+                        <div class="task-time"><strong>🕘 Time:</strong> {{ task.time_start }} - {{ task.time_end }} | {{ task.block }}</div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- Physics -->
+            {% set phys_tasks = tasks | selectattr('subject', 'equalto', 'physics') | list %}
+            {% if phys_tasks %}
+            <div class="card">
+                <div class="card-header">
+                    <span class="subject-icon">⚡</span>
+                    <h3>PHYSICS</h3>
+                    <span class="phase-badge">{{ phys_tasks | selectattr('completed') | list | length }}/{{ phys_tasks | length }}</span>
+                </div>
+                <ul class="task-list">
+                    {% for task in phys_tasks %}
+                    <li class="task-item {{ 'completed' if task.completed else '' }}">
+                        <div class="task-checkbox" onclick="toggleTask({{ task.id }})"></div>
+                        <span class="subject-badge subject-physics">PHYSICS</span>
+                        <div class="task-title">{{ task.title }}</div>
+                        {% if task.description %}
+                        <div class="task-desc">{{ task.description }}</div>
+                        {% endif %}
+                        {% if task.target %}
+                        <div class="task-target"><strong>🎯 Target:</strong> {{ task.target }}</div>
+                        {% endif %}
+                        <div class="task-time"><strong>🕘 Time:</strong> {{ task.time_start }} - {{ task.time_end }} | {{ task.block }}</div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- English -->
+            {% set eng_tasks = tasks | selectattr('subject', 'equalto', 'english') | list %}
+            {% if eng_tasks %}
+            <div class="card">
+                <div class="card-header">
+                    <span class="subject-icon">📖</span>
+                    <h3>ENGLISH</h3>
+                    <span class="phase-badge">{{ eng_tasks | selectattr('completed') | list | length }}/{{ eng_tasks | length }}</span>
+                </div>
+                <ul class="task-list">
+                    {% for task in eng_tasks %}
+                    <li class="task-item {{ 'completed' if task.completed else '' }}">
+                        <div class="task-checkbox" onclick="toggleTask({{ task.id }})"></div>
+                        <span class="subject-badge subject-english">ENGLISH</span>
+                        <div class="task-title">{{ task.title }}</div>
+                        {% if task.description %}
+                        <div class="task-desc">{{ task.description }}</div>
+                        {% endif %}
+                        {% if task.target %}
+                        <div class="task-target"><strong>🎯 Target:</strong> {{ task.target }}</div>
+                        {% endif %}
+                        <div class="task-time"><strong>🕘 Time:</strong> {{ task.time_start }} - {{ task.time_end }} | {{ task.block }}</div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- Tests -->
+            {% set test_tasks = tasks | selectattr('subject', 'equalto', 'test') | list %}
+            {% if test_tasks %}
+            <div class="card">
+                <div class="card-header">
+                    <span class="subject-icon">📊</span>
+                    <h3>TESTS</h3>
+                    <span class="phase-badge">{{ test_tasks | selectattr('completed') | list | length }}/{{ test_tasks | length }}</span>
+                </div>
+                <ul class="task-list">
+                    {% for task in test_tasks %}
+                    <li class="task-item {{ 'completed' if task.completed else '' }}">
+                        <div class="task-checkbox" onclick="toggleTask({{ task.id }})"></div>
+                        <span class="subject-badge subject-test">TEST</span>
+                        <div class="task-title">{{ task.title }}</div>
+                        {% if task.description %}
+                        <div class="task-desc">{{ task.description }}</div>
+                        {% endif %}
+                        {% if task.target %}
+                        <div class="task-target"><strong>🎯 Target:</strong> {{ task.target }}</div>
+                        {% endif %}
+                        <div class="task-time"><strong>🕘 Time:</strong> {{ task.time_start }} - {{ task.time_end }} | {{ task.block }}</div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Week Overview -->
+        <div class="card" style="margin-top: 2rem;">
+            <div class="card-header">
+                <span class="subject-icon">📅</span>
+                <h3>Week Overview</h3>
+                <span class="phase-badge">{{ phase_short }}</span>
+            </div>
+            <div class="calendar-grid">
+                {% set week_start = ((current_day - 1) // 7) * 7 + 1 %}
+                {% for day_offset in range(0, 7) %}
+                    {% set day_num = week_start + day_offset %}
+                    {% if day_num <= 120 %}
+                    {% set day_obj = get_date_for_day(day_num) %}
+                    {% set day_abbrs = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] %}
+                    {% set day_abbr = day_abbrs[day_obj.weekday()] %}
+                    <div class="calendar-day {{ 'today' if day_num == current_day else '' }}" onclick="location.href='{{ url_for('day_view', day_number=day_num) }}'">
+                        <div class="calendar-day-number">{{ day_num }}</div>
+                        <div class="calendar-day-tasks">{{ day_abbr }}</div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleTask(taskId) {
+            fetch(`/toggle_ajax/${taskId}`)
+                .then(response => response.json())
+                .then(data => {
+                    location.reload();
+                });
+        }
+    </script>
+</body>
+</html>

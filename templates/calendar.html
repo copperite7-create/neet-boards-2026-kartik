@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar - NEET Roadmap 2026-27</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1><span class="icon">📅</span> NEET ROADMAP CALENDAR</h1>
+            <nav class="nav-links">
+                <a href="{{ url_for('index') }}">Dashboard</a>
+                <a href="{{ url_for('calendar') }}" class="active">Calendar</a>
+                <a href="{{ url_for('progress') }}">Progress</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="phase-banner">
+            <h2>120-Day Study Calendar</h2>
+            <p>Full roadmap from <strong>{{ start_date.strftime('%B %d, %Y') }}</strong> to <strong>{{ (start_date + timedelta(days=119)).strftime('%B %d, %Y') }}</strong></p>
+        </div>
+
+        <!-- Phase Legend -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <div class="card-header">
+                <span class="subject-icon">🎯</span>
+                <h3>Phase Legend</h3>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div style="border-left: 3px solid #4caf50; padding-left: 1rem;">
+                    <strong>Phase 1: Foundation</strong><br><small>Days 1-21 | Zero to basics</small>
+                </div>
+                <div style="border-left: 3px solid #2196f3; padding-left: 1rem;">
+                    <strong>Phase 2: Syllabus Completion</strong><br><small>Days 22-42 | Complete syllabus</small>
+                </div>
+                <div style="border-left: 3px solid #9c27b0; padding-left: 1rem;">
+                    <strong>Phase 3: First Revision</strong><br><small>Days 43-60 | NCERT + PYQs</small>
+                </div>
+                <div style="border-left: 3px solid #ff9800; padding-left: 1rem;">
+                    <strong>Phase 4: Board Attack</strong><br><small>Days 61-75 | Target 85-90%+</small>
+                </div>
+                <div style="border-left: 3px solid #f44336; padding-left: 1rem;">
+                    <strong>Phase 5: NEET Attack</strong><br><small>Days 76-95 | NEET prep</small>
+                </div>
+                <div style="border-left: 3px solid #e91e63; padding-left: 1rem;">
+                    <strong>Phase 6: Final Revision</strong><br><small>Days 96-105 | High-yield</small>
+                </div>
+                <div style="border-left: 3px solid #00f2fe; padding-left: 1rem;">
+                    <strong>Phase 7: Final Prep</strong><br><small>Days 106-120 | Mocks</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar Grid -->
+        <div class="card">
+            <div class="calendar-grid">
+                <div class="calendar-day-header">Sun</div>
+                <div class="calendar-day-header">Mon</div>
+                <div class="calendar-day-header">Tue</div>
+                <div class="calendar-day-header">Wed</div>
+                <div class="calendar-day-header">Thu</div>
+                <div class="calendar-day-header">Fri</div>
+                <div class="calendar-day-header">Sat</div>
+
+                {% set phase_colors = {
+                    1: '#4caf50',
+                    2: '#2196f3',
+                    3: '#9c27b0',
+                    4: '#ff9800',
+                    5: '#f44336',
+                    6: '#e91e63',
+                    7: '#00f2fe'
+                } %}
+
+                {% for day_num in range(1, 121) %}
+                    {% set date_obj = get_date_for_day(day_num) %}
+                    {% set phase_idx = (day_num - 1) // 21 + 1 %}
+                    {% set phase_color = phase_colors[phase_idx] if phase_idx <= 7 else '#00f2fe' %}
+                    {% set day_tasks = [] %}
+                    {% for t in tasks if t.day_number == day_num %}
+                        {% set _ = day_tasks.append(t) %}
+                    {% endfor %}
+                    {% set completed_count = day_tasks | selectattr('completed') | list | length %}
+                    {% set day_abbrs = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] %}
+                    {% set day_abbr = day_abbrs[date_obj.weekday()] %}
+                    {% set is_today = (date_obj.date() == current_date) %}
+                    {% set is_completed = (day_tasks | length > 0 and completed_count == day_tasks | length) %}
+
+                    <div class="calendar-day {{ 'today' if is_today else 'completed' if is_completed else '' }}" 
+                         onclick="location.href='{{ url_for('day_view', day_number=day_num) }}'"
+                         style="border-left: 3px solid {{ phase_color }};">
+                        <div class="calendar-day-number" style="color: {{ phase_color }};">{{ day_num }}</div>
+                        <div class="calendar-day-tasks">{{ day_abbr }}</div>
+                        {% if day_tasks %}
+                        <div style="margin-top:0.25rem; font-size:0.7rem; color:#a0a0a0;">
+                            {{ completed_count }}/{{ day_tasks|length }} done
+                        </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

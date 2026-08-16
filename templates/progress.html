@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progress - NEET Roadmap 2026-27</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1><span class="icon">📊</span> NEET ROADMAP PROGRESS</h1>
+            <nav class="nav-links">
+                <a href="{{ url_for('index') }}">Dashboard</a>
+                <a href="{{ url_for('calendar') }}">Calendar</a>
+                <a href="{{ url_for('progress') }}" class="active">Progress</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="phase-banner">
+            <h2>Your Journey So Far</h2>
+            <p><strong>{{ completed_tasks }} / {{ total_tasks }} tasks completed</strong> | {{ overall_completion }}% overall</p>
+        </div>
+
+        <!-- Overall Progress -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <div class="card-header">
+                <span class="subject-icon">🎯</span>
+                <h3>Overall Progress</h3>
+            </div>
+            <div class="progress-chart">
+                <div class="progress-item">
+                    <label>Total Completion: {{ overall_completion }}%</label>
+                    <div class="progress-bar-wrapper">
+                        <div class="progress-bar-fill bar-biology" style="width: {{ overall_completion }}%">
+                            {{ completed_tasks }} / {{ total_tasks }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subject-wise Progress -->
+        <div class="dashboard-grid">
+            {% for subject_key, subject_name, icon, color_class in [
+                ('biology', 'BIOLOGY', '🧬', 'bar-biology'),
+                ('chemistry', 'CHEMISTRY', '🧪', 'bar-chemistry'),
+                ('physics', 'PHYSICS', '⚡', 'bar-physics'),
+                ('english', 'ENGLISH', '📖', 'bar-english')
+            ] %}
+            {% set sc = subject_completion[subject_key] %}
+            <div class="card">
+                <div class="card-header">
+                    <span class="subject-icon">{{ icon }}</span>
+                    <h3>{{ subject_name }}</h3>
+                    <span class="phase-badge">{{ sc.percentage }}%</span>
+                </div>
+                <div class="progress-chart">
+                    <div class="progress-item">
+                        <label>Completion: {{ sc.percentage }}%</label>
+                        <div class="progress-bar-wrapper">
+                            <div class="progress-bar-fill {{ color_class }}" style="width: {{ sc.percentage }}%">
+                                {{ sc.done }} / {{ sc.total }}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem; text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: 700; color: {{ 
+                            '#4caf50' if subject_key == 'biology' else 
+                            '#2196f3' if subject_key == 'chemistry' else 
+                            '#9c27b0' if subject_key == 'physics' else 
+                            '#ff9800' 
+                        }};">
+                            {{ sc.done }}/{{ sc.total }}
+                        </div>
+                        <div style="color: #a0a0a0; font-size: 0.9rem;">tasks completed</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Phase Progress -->
+        <div class="card" style="margin-top: 2rem;">
+            <div class="card-header">
+                <span class="subject-icon">📈</span>
+                <h3>Phase Progress</h3>
+            </div>
+            <div class="progress-chart">
+                {% set phase_ranges = [
+                    {'label': 'Phase 1: Foundation (D1-21)', 'start': 1, 'end': 21},
+                    {'label': 'Phase 2: Syllabus Completion (D22-42)', 'start': 22, 'end': 42},
+                    {'label': 'Phase 3: First Revision (D43-60)', 'start': 43, 'end': 60},
+                    {'label': 'Phase 4: Board Attack (D61-75)', 'start': 61, 'end': 75},
+                    {'label': 'Phase 5: NEET Attack (D76-95)', 'start': 76, 'end': 95},
+                    {'label': 'Phase 6: Final Revision (D96-105)', 'start': 96, 'end': 105},
+                    {'label': 'Phase 7: Final Prep (D106-120)', 'start': 106, 'end': 120}
+                ] %}
+                {% for phase in phase_ranges %}
+                {% set phase_tasks = tasks | selectattr('day_number', 'ge', phase.start) | selectattr('day_number', 'le', phase.end) | list %}
+                {% set phase_done = phase_tasks | selectattr('completed') | list | length %}
+                {% set phase_total = phase_tasks | length %}
+                {% set phase_pct = (phase_done / phase_total * 100 | round(1)) if phase_total > 0 else 0 %}
+                <div class="progress-item">
+                    <label>{{ phase.label }}: {{ phase_pct }}%</label>
+                    <div class="progress-bar-wrapper">
+                        <div class="progress-bar-fill bar-biology" style="width: {{ phase_pct }}%">
+                            {{ phase_done }} / {{ phase_total }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Stats Card -->
+        <div class="card" style="margin-top: 2rem; text-align: center;">
+            <div class="card-header">
+                <span class="subject-icon">🏆</span>
+                <h3>Motivation</h3>
+            </div>
+            <div style="padding: 2rem;">
+                <p style="font-size: 1.2rem; color: #00f2fe; margin-bottom: 1rem;">
+                    "Start where you are. Use what you have. Do what you can."
+                </p>
+                <p style="color: #a0a0a0;">
+                    You're on day {{ completed_tasks // 10 + 1 }} of your journey to ace NEET and Boards 2026-27!
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
