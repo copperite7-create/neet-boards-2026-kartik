@@ -968,7 +968,8 @@ def progress():
                           overall_completion=overall_completion,
                           subject_completion=subject_completion)
 
+with app.app_context():
+    populate_database()
+
 if __name__ == '__main__':
-    with app.app_context():
-        populate_database()
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
